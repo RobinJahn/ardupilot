@@ -35,69 +35,69 @@ extern const AP_HAL::HAL& hal;
 // See https://firmware.ardupilot.org/Tools/ToneTester/
 const AP_ToneAlarm::Tone AP_ToneAlarm::_tones[] {
 #define AP_NOTIFY_TONE_QUIET_NEG_FEEDBACK 0
-    { "MFT200L4<<<B#A#2", false },
+    { "V19 MFT255L8<<<B#A#2", false }, //likely first disconnect sound (slightly higher)
 #define AP_NOTIFY_TONE_LOUD_NEG_FEEDBACK 1
-    { "MFT100L4>B#A#2P8B#A#2", false },
+    { "V75 MFT100L4>B#A#2P8B#A#2", false },
 #define AP_NOTIFY_TONE_QUIET_NEU_FEEDBACK 2
-    { "MFT200L4<B#", false },
+    { "V19 MFT200L4<B#", false },
 #define AP_NOTIFY_TONE_LOUD_NEU_FEEDBACK 3
-    { "MFT100L4>B#", false },
+    { "V75 MFT100L4>B#", false },
 #define AP_NOTIFY_TONE_QUIET_POS_FEEDBACK 4
-    { "MFT200L4<A#B#", false },
+    { "V19 MFT200L4<A#B#", false },
 #define AP_NOTIFY_TONE_LOUD_POS_FEEDBACK 5
-    { "MFT100L4>A#B#", false },
+    { "V75 MFT100L4>A#B#", false },
 #define AP_NOTIFY_TONE_LOUD_READY_OR_FINISHED 6
-    { "MFT100L4>G#6A#6B#4", false },
+    { "V75 MFT100L4>G#6A#6B#4", false },
 #define AP_NOTIFY_TONE_QUIET_READY_OR_FINISHED 7
-    { "MFT200L4<G#6A#6B#4", false },
+    { "V19 T150 O3 L8 G B", false }, // second connected sound // ready 
 #define AP_NOTIFY_TONE_LOUD_ATTENTION_NEEDED 8
-    { "MFT100L4>A#A#A#A#", false },
+    { "MV75 FT100L4>A#A#A#A#", false },
 #define AP_NOTIFY_TONE_QUIET_ARMING_WARNING 9
-    { "MNT75L1O2G", false },
+    { "V19 MN T100 L8 B. B", false }, // Arm motors 
 #define AP_NOTIFY_TONE_LOUD_WP_COMPLETE 10
-    { "MFT200L8G>C3", false },
+    { "V75 MFT200L8G>C3", false },
 #define AP_NOTIFY_TONE_LOUD_LAND_WARNING_CTS 11
-    { "MBT200L2A-G-A-G-A-G-", true },
+    { "V75 MBT200L2A-G-A-G-A-G-", true },
 #define AP_NOTIFY_TONE_LOUD_VEHICLE_LOST_CTS 12
-    { "MBT200>A#1", true },
+    { "V255 MBT200>A#1", true },
 #define AP_NOTIFY_TONE_LOUD_BATTERY_ALERT_CTS 13
-    { "MBNT255>A#8A#8A#8A#8A#8A#8A#8A#8A#8A#8A#8A#8A#8A#8A#8A#8", true },
+    { "V255 MBNT255>A#8A#8A#8A#8A#8A#8A#8A#8A#8A#8A#8A#8A#8A#8A#8A#8", true },
 #define AP_NOTIFY_TONE_QUIET_CALIBRATING_CTS 14
-    { "MBNT255<C16P2", true },
+    { "V19 MBNT255<C16P2", true },
 #define AP_NOTIFY_TONE_WAITING_FOR_THROW 15
-    { "MBNT90L4O2A#O3DFN0N0N0", true},
+    { "V19 MBNT90L8O2A#O3DFN0N0N0", true},
 #define AP_NOTIFY_TONE_LOUD_1 16
-    { "MFT100L8>B", false},
+    { "V75 MFT100L8>B", false},
 #define AP_NOTIFY_TONE_LOUD_2 17
-    { "MFT100L8>BB", false},
+    { "V75 MFT100L8>BB", false},
 #define AP_NOTIFY_TONE_LOUD_3 18
-    { "MFT100L8>BBB", false},
+    { "V75 MFT100L8>BBB", false},
 #define AP_NOTIFY_TONE_LOUD_4 19
-    { "MFT100L8>BBBB", false},
+    { "V75 MFT100L8>BBBB", false},
 #define AP_NOTIFY_TONE_LOUD_5 20
-    { "MFT100L8>BBBBB", false},
+    { "V75 MFT100L8>BBBBB", false},
 #define AP_NOTIFY_TONE_LOUD_6 21
-    { "MFT100L8>BBBBBB", false},
+    { "V75 MFT100L8>BBBBBB", false},
 #define AP_NOTIFY_TONE_LOUD_7 22
-    { "MFT100L8>BBBBBBB", false},
+    { "V75 MFT100L8>BBBBBBB", false},
 #define AP_NOTIFY_TONE_TUNING_START 23
-    { "MFT100L20>C#D#", false},
+    { "V75 MFT100L20>C#D#", false},
 #define AP_NOTIFY_TONE_TUNING_SAVE 24
-    { "MFT100L10DBDB>", false},
+    { "V75 MFT200L10DBDB>", false},
 #define AP_NOTIFY_TONE_TUNING_ERROR 25
-    { "MFT100L10>BBBBBBBB", false},
+    { "V75 MFT100L10>BBBBBBBB", false},
 #define AP_NOTIFY_TONE_LEAK_DETECTED 26
-    { "MBT255L8>A+AA-", true},
+    { "V255 MBT255L8>A+AA-", true},
 #define AP_NOTIFY_TONE_QUIET_SHUTDOWN 27
-    { "MFMST200L32O3ceP32cdP32ceP32c<c>c<cccP8L32>c>c<P32<c<c", false },
+    { "V19 MFMST200L32O3ceP32cdP32ceP32c<c>c<cccP8L32>c>c<P32<c<c", false },
 #define AP_NOTIFY_TONE_QUIET_NOT_READY_OR_NOT_FINISHED 28
-    { "MFT200L4<B#4A#6G#6", false },
-#define AP_NOTIFY_TONE_STARTUP 29
-    { "MFT240L8O4aO5dcO4aO5dcO4aO5dcL16dcdcdcdc", false },
+    { "V19 MN T160 O3 L6 A# G", false }, // second disconect 
+#define AP_NOTIFY_TONE_STARTUP 29 
+    { "V19 MF T180 O4 L8 C G", false }, // startup
 #define AP_NOTIFY_TONE_NO_SDCARD 30
-    { "MNBGG", false },
+    { "V19 MN T200 B G G", false },
 #define AP_NOTIFY_TONE_EKF_ALERT 31
-    { "MBNT255>A#8A#8A#8A#8P8A#8A#8A#8A#8P8A#8A#8A#8A#8P8A#8A#8A#8A#8", true },
+    { "V255 MBNT255>A#8A#8A#8A#8P8A#8A#8A#8A#8P8A#8A#8A#8A#8P8A#8A#8A#8A#8", true },
 };
 
 bool AP_ToneAlarm::init()
