@@ -122,6 +122,7 @@
 #endif
 #include "AP_Arming_Plane.h"
 #include "pullup.h"
+#include "systemid.h"
 
 /*
   main APM:Plane class
@@ -180,6 +181,9 @@ public:
 #endif
 #if AP_PLANE_GLIDER_PULLUP_ENABLED
     friend class GliderPullup;
+#endif
+#if AP_PLANE_SYSTEMID_ENABLED
+    friend class AP_SystemID;
 #endif
 
     Plane(void);
@@ -496,9 +500,6 @@ private:
 
         // filtered sink rate for landing
         float sink_rate;
-
-        // time when we first pass min GPS speed on takeoff
-        uint32_t takeoff_speed_time_ms;
 
         // distance to next waypoint
         float wp_distance;

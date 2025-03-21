@@ -323,7 +323,7 @@ const AP_Param::Info Plane::var_info[] = {
 
     // @Param: AIRSPEED_STALL
     // @DisplayName: Stall airspeed
-    // @Description: If stall prevention is enabled this speed is used to calculate the minimum airspeed while banking. If this is set to 0 then the stall speed is assumed to be the minimum airspeed speed. Typically set slightly higher then true stall speed. Value is as an indicated (calibrated/apparent) airspeed.
+    // @Description: If stall prevention is enabled this speed is used for its calculations. If set to 0 then AIRSPEED_MIN is used instead. Typically set slightly higher than the true stall speed. Value is as an indicated (calibrated/apparent) airspeed.
     // @Units: m/s
     // @Range: 5 75
     // @User: Standard
@@ -1049,7 +1049,7 @@ const AP_Param::Info Plane::var_info[] = {
     // @Path: ../libraries/AP_Quicktune/AP_Quicktune.cpp
     GOBJECT(quicktune, "QWIK_",  AP_Quicktune),
 #endif
-    
+
     AP_VAREND
 };
 
@@ -1319,6 +1319,12 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @User: Standard
     AP_GROUPINFO("FWD_BAT_THR_CUT", 37, ParametersG2, fwd_batt_cmp.batt_voltage_throttle_cutoff, 0.0f),
 
+#if AP_PLANE_SYSTEMID_ENABLED
+    // @Group: SID
+    // @Path: systemid.cpp
+    AP_SUBGROUPINFO(systemid, "SID", 38, ParametersG2, AP_SystemID),
+#endif
+    
     AP_GROUPEND
 };
 

@@ -28,6 +28,7 @@
 #include <AP_AHRS/AP_AHRS_config.h>
 #include <AP_Arming/AP_Arming_config.h>
 #include <AP_Airspeed/AP_Airspeed_config.h>
+#include <AP_Follow/AP_Follow.h>
 
 #include "ap_message.h"
 
@@ -412,6 +413,15 @@ public:
     // Index starts at 1
     virtual uint8_t send_available_mode(uint8_t index) const = 0;
 
+#if AP_MAVLINK_MSG_FLIGHT_INFORMATION_ENABLED
+    struct {
+        MAV_LANDED_STATE last_landed_state;
+        uint64_t takeoff_time_us;
+    } flight_info;
+
+    void send_flight_information();
+#endif
+
     // lock a channel, preventing use by MAVLink
     void lock(bool _lock) {
         _locked = _lock;
@@ -533,6 +543,7 @@ protected:
     void handle_set_mode(const mavlink_message_t &msg);
     void handle_command_int(const mavlink_message_t &msg);
 
+    MAV_RESULT handle_command_do_follow(const mavlink_command_int_t &packet, const mavlink_message_t &msg);
     virtual MAV_RESULT handle_command_int_packet(const mavlink_command_int_t &packet, const mavlink_message_t &msg);
     MAV_RESULT handle_command_int_external_position_estimate(const mavlink_command_int_t &packet);
     MAV_RESULT handle_command_int_external_wind_estimate(const mavlink_command_int_t &packet);
