@@ -510,6 +510,10 @@ void Copter::update_flight_mode()
     pos_control->set_reset_handling_method(flightmode->move_vehicle_on_ekf_reset() ? AC_PosControl::EKFResetMethod::MoveVehicle : AC_PosControl::EKFResetMethod::MoveTarget);
 
     flightmode->run();
+    AP::logger().Write("DMIX", "TimeUS,Mix,Des,ThrIn,ThrOut,ThrH,Slew,dt", "Qfffffff", AP_HAL::micros64(),
+                       (double)attitude_control->get_throttle_mix(), (double)static_cast<AC_AttitudeControl_Multi*>(attitude_control)->get_throttle_mix_desired(),
+                       (double)motors->get_throttle(), (double)motors->get_throttle_out(), (double)motors->get_throttle_hover(),
+                       (double)motors->get_throttle_slew_rate(), (double)attitude_control->get_dt_s());
 }
 
 // exit_mode - high level call to organise cleanup as a flight mode is exited
