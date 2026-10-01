@@ -3,6 +3,7 @@
 #include <AP_Vehicle/AP_Vehicle.h>
 #include <AP_Scheduler/AP_Scheduler.h>
 #include <AP_Vehicle/AP_Vehicle_Type.h>
+#include <AP_Logger/AP_Logger.h>
 
 extern const AP_HAL::HAL& hal;
 
@@ -1345,6 +1346,8 @@ bool AC_AttitudeControl::body_to_euler_derivative(const Quaternion& att, const V
 Vector3f AC_AttitudeControl::update_ang_vel_target_from_att_error(const Vector3f &attitude_error_rot_vec_rad)
 {
     Vector3f rate_target_ang_vel;
+
+    AP::logger().Write("DAPS", "TimeUS,X,Y,PDX", "Qfff", AP_HAL::micros64(), (double)_angle_P_scale.x, (double)_angle_P_scale.y, (double)_pd_scale.x);
 
     // Compute the roll angular velocity demand from the roll angle error
     const float angleP_roll = _p_angle_roll.kP() * _angle_P_scale.x;

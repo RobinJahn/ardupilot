@@ -71,6 +71,7 @@ public:
     void set_throttle_mix_max(float ratio) override;
     void set_throttle_mix_value(float value) override { _throttle_rpy_mix_desired = _throttle_rpy_mix = value; }
     float get_throttle_mix(void) const override { return _throttle_rpy_mix; }
+    float get_throttle_mix_desired(void) const { return _throttle_rpy_mix_desired; }
 
     // Returns true if throttle mix is near minimum (i.e., attitude control is deprioritised)
     bool is_throttle_mix_min() const override { return (_throttle_rpy_mix < 1.25f * _thr_mix_min); }
