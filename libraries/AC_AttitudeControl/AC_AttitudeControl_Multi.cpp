@@ -412,7 +412,8 @@ float AC_AttitudeControl_Multi::get_throttle_avg_max(float throttle_in)
     return MAX(throttle_in, throttle_in * MAX(0.0f, 1.0f - _throttle_rpy_mix) + _motors.get_throttle_hover() * _throttle_rpy_mix);
 }
 
-// update_throttle_gain_boost - boost angle_p/pd each cycle on high throttle slew
+// update_throttle_gain_boost - boost angle_p/pd on high throttle slew
+// the scales are multiplicative so this must only be called once per main loop, after they have been reset
 void AC_AttitudeControl_Multi::update_throttle_gain_boost()
 {
     // Boost PD and Angle P on very rapid throttle changes
@@ -459,9 +460,6 @@ void AC_AttitudeControl_Multi::rate_controller_run_dt(const Vector3f& gyro_rads,
     // take a copy of the target so that it can't be changed from under us.
     Vector3f ang_vel_body = _ang_vel_body_rads;
 
-    // boost angle_p/pd each cycle on high throttle slew
-    update_throttle_gain_boost();
-
     // move throttle vs attitude mixing towards desired (called from here because this is conveniently called on every iteration)
     update_throttle_rpy_mix(dt);
 
@@ -482,6 +480,17 @@ void AC_AttitudeControl_Multi::rate_controller_run_dt(const Vector3f& gyro_rads,
     _pd_scale_used = _pd_scale;
     _i_scale_used = _i_scale;
     _angle_P_scale_used = _angle_P_scale;
+}
+
+// reset the rate controller target loop updates
+// the throttle gain boost is applied here rather than in the rate controller as the rate
+// controller may be run more than once per main loop
+void AC_AttitudeControl_Multi::rate_controller_target_reset()
+{
+    AC_AttitudeControl::rate_controller_target_reset();
+
+    // boost angle_p/pd on high throttle slew
+    update_throttle_gain_boost();
 }
 
 // run the rate controller using the configured _dt and latest gyro_rads

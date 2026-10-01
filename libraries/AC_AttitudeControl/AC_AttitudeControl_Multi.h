@@ -79,6 +79,9 @@ public:
     void rate_controller_run_dt(const Vector3f& gyro_rads, float dt) override;
     void rate_controller_run() override;
 
+    // reset the rate controller target loop updates and apply the throttle gain boost for the next loop
+    void rate_controller_target_reset() override;
+
     // sanity check parameters.  should be called once before take-off
     void parameter_sanity_check() override;
 
@@ -91,7 +94,7 @@ public:
 protected:
 
     // Boosts angle controller gains during rapid throttle changes to improve responsiveness
-    // boost angle_p/pd each cycle on high throttle slew
+    // boost angle_p/pd once per main loop on high throttle slew
     void update_throttle_gain_boost();
 
     // Slews the current throttle-to-attitude mix ratio toward the target (_throttle_rpy_mix_desired)
