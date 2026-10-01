@@ -12043,6 +12043,73 @@ class AutoTestCopter(vehicle_test_suite.TestSuite):
 
         self.do_RTL()
 
+    def ThrottleGainBoostFastRate(self):
+        """Check throttle gain boost is applied once per loop, with and without the fast rate thread."""
+        boost = 0.4
+        pd_boost = 1 + boost
+        angle_p_boost = pd_boost * pd_boost
+        tolerance = 0.01
+
+        self.set_parameters({
+            "AHRS_EKF_TYPE": 10,
+            "EK2_ENABLE": 0,
+            "EK3_ENABLE": 0,
+            "LOG_BITMASK": 1,  # ATTITUDE_FAST, logs ATSC from the rate controller
+            "LOG_DISARMED": 0,
+            "LOG_FILE_RATEMAX": 0,
+            "ATC_THR_G_BOOST": boost,
+            "FSTRATE_DIV": 1,
+            # smooth the RC throttle steps so the motors see a fast throttle slew
+            "PILOT_THR_FILT": 5,
+        })
+
+        for fstrate_enable in 2, 0:
+            self.start_subtest("FSTRATE_ENABLE=%u" % fstrate_enable)
+            self.set_parameter("FSTRATE_ENABLE", fstrate_enable)
+            self.reboot_sitl()
+
+            self.takeoff(10, mode="STABILIZE")
+
+            # rapid throttle changes trigger the throttle gain boost
+            for i in range(6):
+                self.set_rc(3, 1800)
+                self.delay_sim_time(0.3, reason="throttle punch up")
+                self.set_rc(3, 1200)
+                self.delay_sim_time(0.3, reason="throttle punch down")
+            self.set_rc(3, 1500)
+
+            self.change_mode("LAND")
+            self.wait_disarmed(timeout=120)
+
+            dfreader = self.dfreader_for_current_onboard_log()
+            max_pd_scale = 0
+            max_angle_p_scale = 0
+            count = 0
+            rate_thread_running = False
+            while True:
+                m = dfreader.recv_match(type=['ATSC', 'RTDT'])
+                if m is None:
+                    break
+                if m.get_type() == 'RTDT':
+                    rate_thread_running = True
+                    continue
+                count += 1
+                max_pd_scale = max(max_pd_scale, m.PDScX, m.PDScY)
+                max_angle_p_scale = max(max_angle_p_scale, m.AngPScX, m.AngPScY)
+
+            self.progress("ATSC count=%u max PDSc=%f max AngPSc=%f rate thread running=%s" %
+                          (count, max_pd_scale, max_angle_p_scale, rate_thread_running))
+
+            if rate_thread_running != (fstrate_enable != 0):
+                raise NotAchievedException("Rate thread running=%s with FSTRATE_ENABLE=%u" %
+                                           (rate_thread_running, fstrate_enable))
+
+            # the boost must be applied, but only once per loop
+            if abs(max_pd_scale - pd_boost) > tolerance:
+                raise NotAchievedException("Max PD scale %f, want %f" % (max_pd_scale, pd_boost))
+            if abs(max_angle_p_scale - angle_p_boost) > tolerance:
+                raise NotAchievedException("Max angle P scale %f, want %f" % (max_angle_p_scale, angle_p_boost))
+
     def test_gyro_fft_harmonic(self, averaging):
         """Use dynamic harmonic notch to control motor noise with harmonic matching of the first harmonic."""
         # basic gyro sample rate test
@@ -19041,6 +19108,7 @@ class AutoTestCopter(vehicle_test_suite.TestSuite):
             self.EK3_RNG_USE_HGT,
             self.NoRC,
             self.ThrottleGainBoost,
+            Test(self.ThrottleGainBoostFastRate, speedup=8),  # the fast rate thread needs a low speedup
             self.ScriptMountPOI,
             self.GuidedYawRate,
             self.MISSION_OPTION_CLEAR_MISSION_AT_BOOT,
