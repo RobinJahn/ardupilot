@@ -29,7 +29,8 @@ void Copter::takeoff_check()
     const bool motor_check_passed = motors_takeoff_check(g2.takeoff_rpm_min, g2.takeoff_rpm_max);
 
     // Check system load
-    float avg_load, peak_load;
+    // init to -1 so an unavailable measurement (e.g. BRD_IDLE_STATS=0) is distinguishable from 0%
+    float avg_load = -1.0f, peak_load = -1.0f;
     bool load_adequate = true;
     if (hal.util->get_system_load(avg_load, peak_load)) {
         if (avg_load > 95.0f || peak_load > 99.5f) {
@@ -38,7 +39,14 @@ void Copter::takeoff_check()
     }
 
     // Clear block if all checks passed
-    if (motor_check_passed && load_adequate) {
+    const bool block_cleared = motor_check_passed && load_adequate;
+#if HAL_LOGGING_ENABLED
+    // investigation logging: what the pre-takeoff check actually saw and decided
+    AP::logger().Write("TOCK", "TimeUS,AvgLoad,PeakLoad,LoadOK,MotOK,Cleared", "QffBBB",
+                       AP_HAL::micros64(), avg_load, peak_load,
+                       (uint8_t)load_adequate, (uint8_t)motor_check_passed, (uint8_t)block_cleared);
+#endif
+    if (block_cleared) {
         motors->set_spoolup_block(false);
         return;
     }

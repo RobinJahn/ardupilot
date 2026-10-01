@@ -288,6 +288,24 @@ void Copter::rate_controller_thread()
 #if HAL_LOGGING_ENABLED
         if (now_ms - last_rtdt_log_ms >= 100) {    // 10 Hz
             Log_Write_Rate_Thread_Dt(dt, sensor_dt, max_dt, min_dt);
+            // investigation logging: true CPU load + fast-rate thread state. Emitted from
+            // the rate thread so it keeps recording even when the main loop is starved.
+            // AvgLoad/PeakLoad are -1 when unavailable (e.g. BRD_IDLE_STATS=0).
+            float avg_load = -1.0f, peak_load = -1.0f;
+            hal.util->get_system_load(avg_load, peak_load);
+            // NOTE: the FMT record stores all labels in a single char[64] field, so the
+            // combined label string must stay < 64 chars or the trailing names get truncated.
+            // Short names: Avg=AvgLoad%, Peak=PeakLoad%, Att=AttRateHz, RDec=RateDec, TDec=TargDec,
+            // Slow=RunSlow, Extra=ExtraUS, FR=FRType. Format/value order is unchanged.
+            AP::logger().Write("FRSL",
+                               "TimeUS,Avg,Peak,Att,RDec,TDec,Slow,Extra,LoopHz,Armed,FR",
+                               "QffHBBIIHBB",
+                               AP_HAL::micros64(), avg_load, peak_load,
+                               (uint16_t)(rate_decimation > 0 ? ins.get_raw_gyro_rate_hz()/rate_decimation : 0U),
+                               (uint8_t)rate_decimation, (uint8_t)target_rate_decimation,
+                               (uint32_t)running_slow, (uint32_t)AP::scheduler().get_extra_loop_us(),
+                               (uint16_t)AP::scheduler().get_filtered_loop_rate_hz(),
+                               (uint8_t)motors->armed(), (uint8_t)get_fast_rate_type());
             max_dt = sensor_dt;
             min_dt = sensor_dt;
             last_rtdt_log_ms = now_ms;
