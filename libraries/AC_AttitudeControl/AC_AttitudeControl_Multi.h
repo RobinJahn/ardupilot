@@ -77,6 +77,9 @@ public:
 
     // run lowest level body-frame rate controller and send outputs to the motors
     void rate_controller_run_dt(const Vector3f& gyro_rads, float dt) override;
+
+    // Resets per-loop gain scaling and applies the throttle gain boost once per main loop
+    void rate_controller_target_reset() override;
     void rate_controller_run() override;
 
     // sanity check parameters.  should be called once before take-off
