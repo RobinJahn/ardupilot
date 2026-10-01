@@ -288,6 +288,9 @@ void AC_AttitudeControl::reset_rate_controller_I_terms_smoothly()
 // reset the rate controller target loop updates
 void AC_AttitudeControl::rate_controller_target_reset()
 {
+    // record the angle P scale used by the angle controller since the last reset
+    _angle_P_scale_used = _angle_P_scale;
+
     _sysid_ang_vel_body_rads.zero();
     _actuator_sysid.zero();
     _pd_scale = VECTORF_111;

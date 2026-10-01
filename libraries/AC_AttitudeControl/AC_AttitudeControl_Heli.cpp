@@ -351,7 +351,6 @@ void AC_AttitudeControl_Heli::rate_controller_run()
 
     _pd_scale_used = _pd_scale;
     _i_scale_used = _i_scale;
-    _angle_P_scale_used = _angle_P_scale;
 }
 
 // Update Alt_Hold angle maximum

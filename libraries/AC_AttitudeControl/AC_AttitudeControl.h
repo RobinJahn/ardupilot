@@ -683,7 +683,7 @@ protected:
     // Active scaling applied to Angle P gains for roll, pitch, yaw
     Vector3f            _angle_P_scale{1,1,1};
 
-    // Active scaling applied to Angle P gains this loop (for logging/debugging)
+    // Scaling applied to Angle P gains in the last loop, recorded on rate controller target reset (for logging/debugging)
     Vector3f            _angle_P_scale_used;
 
     // Proportional-Derivative gains applied dynamically per axis
