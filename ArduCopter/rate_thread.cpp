@@ -185,6 +185,12 @@ void Copter::rate_controller_thread()
     uint32_t last_rate_increase_ms = 0;
 #if HAL_LOGGING_ENABLED
     uint32_t last_rtdt_log_ms = now_ms;
+    // per-pass work time and gyro queue depth since the last RTDT output
+    uint32_t busy_count = 0;
+    uint32_t busy_sum_us = 0;
+    uint32_t busy_max_us = 0;
+    uint32_t busy_overruns = 0;
+    uint32_t queue_max = 0;
 #endif
     uint32_t last_notch_sample_ms = now_ms;
     bool was_using_rate_thread = false;
@@ -259,11 +265,15 @@ void Copter::rate_controller_thread()
         last_run_us = now_us;
 
         // check if we are falling behind
-        if (ins.get_num_gyro_samples() > 2) {
+        const uint32_t queued_samples = ins.get_num_gyro_samples();
+        if (queued_samples > 2) {
             running_slow++;
         } else if (running_slow > 0) {
             running_slow--;
         }
+#if HAL_LOGGING_ENABLED
+        queue_max = MAX(queue_max, queued_samples);
+#endif
         if (AP::scheduler().get_extra_loop_us() == 0) {
             rate_loop_count++;
         }
@@ -325,9 +335,21 @@ void Copter::rate_controller_thread()
 
 #if HAL_LOGGING_ENABLED
         if (now_ms - last_rtdt_log_ms >= 100) {    // 10 Hz
-            Log_Write_Rate_Thread_Dt(dt, sensor_dt, max_dt, min_dt);
+            const float busy_avg_us = busy_count > 0 ? float(busy_sum_us) / float(busy_count) : 0.0f;
+            float cpu_load = -1.0f;
+            float cpu_peak = 0.0f;
+            if (!hal.util->get_system_load(cpu_load, cpu_peak)) {
+                cpu_load = -1.0f;
+            }
+            Log_Write_Rate_Thread_Dt(dt, sensor_dt, max_dt, min_dt,
+                                     busy_count, busy_avg_us, busy_max_us, busy_overruns, queue_max, cpu_load);
             max_dt = sensor_dt;
             min_dt = sensor_dt;
+            busy_count = 0;
+            busy_sum_us = 0;
+            busy_max_us = 0;
+            busy_overruns = 0;
+            queue_max = 0;
             last_rtdt_log_ms = now_ms;
         }
 #endif
@@ -435,6 +457,17 @@ void Copter::rate_controller_thread()
             last_timing_msg_us = rate_now_us;
             timing_count = 0;
             gyro_sample_time_us = rate_controller_time_us = motor_output_us = log_output_us = ctrl_output_us = 0;
+        }
+#endif
+
+#if HAL_LOGGING_ENABLED
+        // time from receiving the gyro sample to the end of this pass
+        const uint32_t busy_us = AP_HAL::micros() - now_us;
+        busy_count++;
+        busy_sum_us += busy_us;
+        busy_max_us = MAX(busy_max_us, busy_us);
+        if (float(busy_us) * 1.0e-6f > sensor_dt) {
+            busy_overruns++;
         }
 #endif
 

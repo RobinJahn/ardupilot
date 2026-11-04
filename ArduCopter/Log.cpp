@@ -354,6 +354,12 @@ struct PACKED log_Rate_Thread_Dt {
     float dtAvg;
     float dtMax;
     float dtMin;
+    uint16_t n;
+    float busy_avg_us;
+    uint32_t busy_max_us;
+    uint16_t overruns;
+    uint8_t queue_max;
+    float cpu_load;
 };
 
 // Write a Guided mode position target
@@ -403,7 +409,9 @@ void Copter::Log_Write_Guided_Attitude_Target(ModeGuided::SubMode submode, float
     logger.WriteBlock(&pkt, sizeof(pkt));
 }
 
-void Copter::Log_Write_Rate_Thread_Dt(float dt, float dtAvg, float dtMax, float dtMin)
+void Copter::Log_Write_Rate_Thread_Dt(float dt, float dtAvg, float dtMax, float dtMin,
+                                      uint32_t n, float busy_avg_us, uint32_t busy_max_us,
+                                      uint32_t overruns, uint32_t queue_max, float cpu_load)
 {
 #if AP_INERTIALSENSOR_FAST_SAMPLE_WINDOW_ENABLED
     const log_Rate_Thread_Dt pkt {
@@ -412,7 +420,13 @@ void Copter::Log_Write_Rate_Thread_Dt(float dt, float dtAvg, float dtMax, float 
         dt              : dt,
         dtAvg           : dtAvg,
         dtMax           : dtMax,
-        dtMin           : dtMin
+        dtMin           : dtMin,
+        n               : uint16_t(MIN(n, 0xFFFFU)),
+        busy_avg_us     : busy_avg_us,
+        busy_max_us     : busy_max_us,
+        overruns        : uint16_t(MIN(overruns, 0xFFFFU)),
+        queue_max       : uint8_t(MIN(queue_max, 0xFFU)),
+        cpu_load        : cpu_load
     };
     logger.WriteBlock(&pkt, sizeof(pkt));
 #endif
@@ -568,9 +582,15 @@ const struct LogStructure Copter::log_structure[] = {
 // @Field: dtAvg: current time delta average
 // @Field: dtMax: Max time delta since last log output
 // @Field: dtMin: Min time delta since last log output
+// @Field: N: Rate loop passes since last log output
+// @Field: BAvg: Average time from gyro sample to end of pass since last log output
+// @Field: BMax: Max time from gyro sample to end of pass since last log output
+// @Field: Ovr: Passes since last log output that took longer than the sample period
+// @Field: QMax: Max gyro samples left waiting after taking one, since last log output
+// @Field: CPU: CPU load from idle time, -1 if not measured
 
     { LOG_RATE_THREAD_DT_MSG, sizeof(log_Rate_Thread_Dt),
-      "RTDT", "Qffff", "TimeUS,dt,dtAvg,dtMax,dtMin", "sssss", "F----" , true },
+      "RTDT", "QffffHfIHBf", "TimeUS,dt,dtAvg,dtMax,dtMin,N,BAvg,BMax,Ovr,QMax,CPU", "sssss-ss--%", "F-----FF--0" , true },
 
 };
 

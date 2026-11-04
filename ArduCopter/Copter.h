@@ -913,7 +913,9 @@ private:
     void Log_Write_SysID_Setup(uint8_t systemID_axis, float waveform_magnitude, float frequency_start, float frequency_stop, float time_fade_in, float time_const_freq, float time_record, float time_fade_out);
     void Log_Write_SysID_Data(float waveform_time, float waveform_sample, float waveform_freq_hz, float angle_x_degs, float angle_y_degs, float angle_z_degs, float accel_x_mss, float accel_y_mss, float accel_z_mss);
     void Log_Write_Vehicle_Startup_Messages();
-    void Log_Write_Rate_Thread_Dt(float dt, float dtAvg, float dtMax, float dtMin);
+    void Log_Write_Rate_Thread_Dt(float dt, float dtAvg, float dtMax, float dtMin,
+                                  uint32_t n, float busy_avg_us, uint32_t busy_max_us,
+                                  uint32_t overruns, uint32_t queue_max, float cpu_load);
 #endif  // HAL_LOGGING_ENABLED
 
     // mode.cpp
