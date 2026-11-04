@@ -437,12 +437,6 @@ __RAMFUNC__ void Util::thread_info(ExpandingString &str)
                     unsigned(stack_free(tp->wabase)), unsigned(total_stack));
 #endif
     }
-#if AP_CPU_IDLE_STATS_ENABLED && HAL_USE_LOAD_MEASURE
-    if (AP_BoardConfig::use_idle_stats()) {
-        sysStopLoadMeasure();
-        sysStartLoadMeasure();
-    }
-#endif
 }
 #endif // CH_DBG_ENABLE_STACK_CHECK == TRUE
 

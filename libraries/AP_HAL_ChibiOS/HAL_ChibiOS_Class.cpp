@@ -232,13 +232,6 @@ static void main_loop()
 {
     daemon_task = chThdGetSelfX();
 
-#if AP_CPU_IDLE_STATS_ENABLED && HAL_USE_LOAD_MEASURE
-    if (AP_BoardConfig::use_idle_stats()) {
-        sysInitLoadMeasure();
-        sysStartLoadMeasure();
-    }
-#endif
-
     /*
       switch to high priority for main loop
      */
@@ -281,6 +274,15 @@ static void main_loop()
     schedulerInstance.hal_initialized();
 
     g_callbacks->setup();
+
+#if AP_CPU_IDLE_STATS_ENABLED && HAL_USE_LOAD_MEASURE
+    // parameters are loaded by setup(), so only now does BRD_IDLE_STATS
+    // hold the stored value
+    if (AP_BoardConfig::use_idle_stats()) {
+        sysInitLoadMeasure();
+        sysStartLoadMeasure();
+    }
+#endif
 
 #if HAL_ENABLE_SAVE_PERSISTENT_PARAMS
     utilInstance.apply_persistent_params();
