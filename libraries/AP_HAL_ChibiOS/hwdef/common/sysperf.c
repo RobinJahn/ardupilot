@@ -183,7 +183,10 @@ void sysIdleEnterMeasure(void) {
       rtcnt_t run  = _load.run.cumulative / _load.run.n;
       sys_cpu_load_t current = 0;
       if (idle + run > (rtcnt_t)0) {
-        current = (run * SYS_CPU_MAX_LOAD) / (idle + run);
+        /* widen the product: run * SYS_CPU_MAX_LOAD overflows 32 bits once
+           the mean run burst exceeds ~430k cycles, about 1ms, which happens
+           at exactly the high loads this is meant to report */
+        current = (sys_cpu_load_t)(((uint64_t)run * SYS_CPU_MAX_LOAD) / (idle + run));
       }
 
       /* Update the average and peak.*/
