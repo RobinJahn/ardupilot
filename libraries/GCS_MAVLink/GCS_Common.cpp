@@ -3645,8 +3645,10 @@ MAV_RESULT GCS_MAVLINK::handle_preflight_reboot(const mavlink_command_int_t &pac
                                                 static_cast<float>(REBOOT_SHUTDOWN_ACTION_REBOOT_TO_BOOTLOADER));
 
 #if AP_REBOOT_MASS_STORAGE_ENABLED
-    const bool reboot_to_mass_storage = is_equal(packet.param1,
-                                                  static_cast<float>(REBOOT_SHUTDOWN_ACTION_REBOOT_TO_MASS_STORAGE));
+    // REBOOT_SHUTDOWN_ACTION_REBOOT_TO_MASS_STORAGE in MAVLink common.xml;
+    // the mavlink definitions this branch builds with predate it
+    static constexpr float reboot_action_to_mass_storage = 5.0f;
+    const bool reboot_to_mass_storage = is_equal(packet.param1, reboot_action_to_mass_storage);
 
     // exporting writable storage must never be entered while armed
     if (reboot_to_mass_storage && hal.util->get_soft_armed()) {
